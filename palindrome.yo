@@ -1,0 +1,46 @@
+  0x000: 308304000000 | main:	irmovl $4, %ebx		# bx = 4 (bp decr)
+  0x006: 308101000000 | 	irmovl $1, %ecx 	# cx = 1 (const 1 var)
+  0x00c: 308600000000 | 	irmovl $0, %esi		# i = 0 (incr var)
+  0x012: 308400100000 | 	irmovl $0x1000, %esp	# set stack pointer
+  0x018: 2045         | 	rrmovl %esp, %ebp	# set frame pointer
+                      | 
+  0x01a: f008         | read:	rdch %eax   		# ax = user input
+                      | 
+  0x01c: 30870a000000 | 	irmovl $10, %edi	# di = '\n' 
+  0x022: 6107         | 	subl %eax, %edi		# subtracts values
+  0x024: 733a000000   | 	je cycle 		# if '\n' entered, equal, done
+                      | 
+  0x029: a008         | 	pushl %eax		# push array[i] into stack
+                      | 
+  0x02b: 308014000000 | 	irmovl $20, %eax	# i < MAX_CHARACTERS
+  0x031: 6016         | 	addl %ecx, %esi		# i++
+  0x033: 6160         | 	subl %esi, %eax		# find difference
+  0x035: 761a000000   | 	jg read	   		# loop again until 0
+                      | 
+  0x03a: 2067         | cycle:	rrmovl %esi, %edi	# data_length = i
+  0x03c: 308602000000 | 	irmovl $2, %esi		# i = 2
+  0x042: 6567         | 	divl %esi, %edi		# data_length = data_length / 2
+  0x044: 308600000000 | 	irmovl $0, %esi		# i = 0 (incr var)
+                      | 	
+  0x04a: 6135         | comp:	subl %ebx, %ebp		# move bp up one byte
+  0x04c: b008         | 	popl %eax		# ax = top of stack and move sp down byte
+  0x04e: 502500000000 | 	mrmovl 0(%ebp), %edx	# dx = *(bp)
+  0x054: 6102         | 	subl %eax, %edx		# compare ax and dx chars
+  0x056: 7471000000   | 	jne Npali  		# quit if differing
+                      | 
+  0x05b: 2070         | 	rrmovl %edi, %eax	# i < data_length / 2
+  0x05d: 6016         | 	addl %ecx, %esi		# i++
+  0x05f: 6160         | 	subl %esi, %eax		# find difference
+  0x061: 764a000000   | 	jg comp		# loop again until 0
+                      | 
+  0x066: 308359000000 | Ypali:	irmovl $89, %ebx	# bx = 'Y'
+  0x06c: 7077000000   | 	jmp done    		# exit program
+                      | 
+  0x071: 30834e000000 | Npali:	irmovl $78, %ebx	# bx = 'N'
+                      | 
+  0x077: f138         | done:	wrch %ebx		# prints result of program (Y/N)
+  0x079: 30800a000000 | 	irmovl $10,%eax		# moves \n to register
+  0x07f: f108         | 	wrch %eax		# print \n
+  0x081: 10           | 	halt 			# Devtulya Kavathekar 111079285
+  0x084:              | 	.align 4
+                      | 

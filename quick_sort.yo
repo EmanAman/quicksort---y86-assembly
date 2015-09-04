@@ -1,0 +1,166 @@
+  0x000: 308400100000 | main:	irmovl $0x1000, %esp	# set stack pointer
+  0x006: 3081ca010000 | 	irmovl array, %ecx 	# cx = array
+  0x00c: 3083c2010000 | 	irmovl data, %ebx	# bx = data ref
+                      | 
+  0x012: f208         | 	rdint %eax		# input num_elements
+  0x014: 400300000000 | 	rmmovl %eax, 0(%ebx)	# save num_elements
+                      | 
+  0x01a: 507304000000 | 	mrmovl 4(%ebx), %edi	# num_elements <= MAX ARRAY SIZE
+  0x020: 6107         | 	subl %eax, %edi		
+  0x022: 72a4000000   | 	jl  return 		
+                      | 
+  0x027: 308204000000 | 	irmovl $4, %edx		# bx = 4
+  0x02d: 308701000000 | 	irmovl $1, %edi		# incr var
+  0x033: 308600000000 | 	irmovl $0, %esi		# counter var
+                      | 	
+  0x039: f208         | rdata:	rdint %eax		# read numbers
+  0x03b: 400100000000 | 	rmmovl %eax, 0(%ecx)	# store in array[si]
+                      | 		
+  0x041: 6021         | 	addl %edx, %ecx		# array = array + 4
+                      | 	
+  0x043: 505300000000 | 	mrmovl 0(%ebx),	%ebp	# tmp = num_elements	
+  0x049: 6076         | 	addl %edi, %esi		# i++	
+  0x04b: 6165         | 	subl %esi, %ebp 	# i < tmp
+  0x04d: 7639000000   | 	jg rdata   		# loop again
+                      | 	
+  0x052: 6176         | 	subl %edi, %esi		# num_element - 1
+                      | 
+  0x054: 3081ca010000 | 	irmovl array, %ecx	# start at beginning of array
+                      | 	
+  0x05a: a068         | 	pushl %esi		# param num_element -1
+  0x05c: a058         | 	pushl %ebp		# param 0
+  0x05e: a018         | 	pushl %ecx		# param array pointer
+                      | 
+  0x060: 80b0000000   | 	call quick		# start recursive call to quicksort
+                      | 
+  0x065: 3081ca010000 | 	irmovl array, %ecx	# reset variables
+  0x06b: 3083c2010000 | 	irmovl data, %ebx	#
+                      | 
+  0x071: 308204000000 | 	irmovl $4, %edx		# 
+  0x077: 308701000000 | 	irmovl $1, %edi		#
+  0x07d: 308600000000 | 	irmovl $0, %esi		#
+                      | 
+  0x083: 500100000000 | wdata:	mrmovl 0(%ecx), %eax	# code to write array 
+  0x089: f308         | 	wrint %eax		# print array element
+                      | 	
+  0x08b: 6021         | 	addl %edx, %ecx		# cx = cx + 4 bytes
+                      | 	
+  0x08d: 308020000000 | 	irmovl $32, %eax	# 
+  0x093: f108         | 	wrch %eax   		# print space
+                      | 	
+  0x095: 505300000000 | 	mrmovl 0(%ebx), %ebp	# store max element in eax
+  0x09b: 6076         | 	addl %edi, %esi		# 
+  0x09d: 6165         | 	subl %esi, %ebp		# 
+  0x09f: 7683000000   | 	jg wdata   		# 
+                      | 	
+  0x0a4: 30800a000000 | return:	irmovl $10, %eax	#	
+  0x0aa: f108         | 	wrch %eax   		#
+                      | 
+  0x0ac: 10           | 	halt			#
+  0x0b0:              | 	.align 4
+                      | 	  
+  0x0b0: a058         | quick:	pushl %ebp		# ON ENTRY
+  0x0b2: 2045         | 	rrmovl %esp, %ebp	# ON ENTRY
+                      | 	
+  0x0b4: 50050c000000 | 	mrmovl 12(%ebp), %eax	# (y-x) > 0 check
+  0x0ba: 503510000000 | 	mrmovl 16(%ebp), %ebx	# 
+  0x0c0: 6103         | 	subl %eax, %ebx		#
+  0x0c2: 71bd010000   | 	jle quickf		# 
+                      | 
+  0x0c7: 308204000000 | 	irmovl $4, %edx		# 4 byte intervals
+  0x0cd: 501508000000 | 	mrmovl 8(%ebp), %ecx	# cx = arr
+  0x0d3: 6420         | 	multl %edx, %eax	# ax = first * 4
+  0x0d5: 6001         | 	addl %eax, %ecx		# move arr to arr[first]
+  0x0d7: 503100000000 | 	mrmovl 0(%ecx), %ebx	# bx = pivot
+                      | 		
+  0x0dd: 50050c000000 | 	mrmovl 12(%ebp), %eax	# ax = border = first
+                      | 
+  0x0e3: 6021         | 	addl %edx, %ecx	 	# arr += 4 (arr[i] = arr[first+1])
+                      | 	
+  0x0e5: 2032         | partl:	rrmovl %ebx, %edx
+  0x0e7: 506100000000 | 	mrmovl 0(%ecx), %esi	
+                      | 	
+  0x0ed: 6126         | 	subl %edx, %esi		
+  0x0ef: 7624010000   | 	jg incr
+                      | 	
+  0x0f4: 308201000000 | 	irmovl $1, %edx
+  0x0fa: 6020         | 	addl %edx, %eax
+                      | 	
+  0x0fc: 3086ca010000 | 	irmovl array, %esi
+  0x102: 308204000000 | 	irmovl $4, %edx		# SWAP (border, i)
+  0x108: 6402         | 	multl %eax, %edx
+  0x10a: 6026         | 	addl %edx, %esi
+                      | 
+  0x10c: 507600000000 | 	mrmovl 0(%esi), %edi
+  0x112: 502100000000 | 	mrmovl 0(%ecx), %edx
+  0x118: 407100000000 | 	rmmovl %edi, 0(%ecx)
+  0x11e: 402600000000 | 	rmmovl %edx, 0(%esi)
+                      | 
+  0x124:              | incr:	
+  0x124: 308204000000 | 	irmovl $4, %edx
+  0x12a: 6021         | 	addl %edx, %ecx
+                      | 
+  0x12c: 2016         | 	rrmovl %ecx, %esi		
+  0x12e: 507510000000 | 	mrmovl 16(%ebp), %edi
+  0x134: 6427         | 	multl %edx, %edi
+  0x136: 6027         | 	addl %edx, %edi
+                      | 
+  0x138: 3082ca010000 | 	irmovl array, %edx
+  0x13e: 6027         | 	addl %edx, %edi
+                      | 
+  0x140: 6167         | 	subl %esi, %edi
+  0x142: 76e5000000   | 	jg partl
+                      | 		
+                      | 				#swamp first, border
+  0x147: 3086ca010000 | 	irmovl array, %esi
+  0x14d: 308204000000 | 	irmovl $4, %edx
+  0x153: 50350c000000 | 	mrmovl 12(%ebp), %ebx
+  0x159: 6423         | 	multl %edx, %ebx
+  0x15b: 6063         | 	addl %esi, %ebx
+                      | 
+  0x15d: 6402         | 	multl %eax, %edx
+  0x15f: 6062         | 	addl %esi, %edx
+                      | 
+  0x161: 507300000000 | 	mrmovl 0(%ebx), %edi
+  0x167: 501200000000 | 	mrmovl 0(%edx), %ecx
+  0x16d: 407200000000 | 	rmmovl %edi, 0(%edx)
+  0x173: 401300000000 | 	rmmovl %ecx, 0(%ebx)
+                      | 
+                      | 	
+  0x179: 308701000000 | 	irmovl $1, %edi
+  0x17f: 6170         | 	subl %edi, %eax		# pivot_index - 1
+  0x181: a008         | 	pushl %eax		# push pivot_index-1
+                      | 
+  0x183: 50050c000000 | 	mrmovl 12(%ebp), %eax	# push x
+  0x189: a008         | 	pushl %eax
+                      | 
+  0x18b: 3080ca010000 | 	irmovl array, %eax
+  0x191: a008         | 	pushl %eax
+                      | 		
+  0x193: 80b0000000   | 	call quick
+                      | 
+                      | 
+  0x198: 500510000000 | 	mrmovl 16(%ebp), %eax	# push x
+  0x19e: a008         | 	pushl %eax
+                      | 	
+  0x1a0: 308702000000 | 	irmovl $2, %edi
+  0x1a6: 5005fcffffff | 	mrmovl -4(%ebp), %eax
+  0x1ac: 6070         | 	addl %edi, %eax
+  0x1ae: a008         | 	pushl %eax
+                      | 
+  0x1b0: 3080ca010000 | 	irmovl array, %eax
+  0x1b6: a008         | 	pushl %eax
+                      | 
+  0x1b8: 80b0000000   | 	call quick
+                      | 
+  0x1bd: 2054         | quickf:	rrmovl %ebp, %esp	# ON EXIT
+  0x1bf: b058         | 	popl %ebp    		# ON EXIT
+  0x1c1: 90           | 	ret  			# ON EXIT
+                      | 
+  0x1c2:              | data:
+  0x1c2: 00000000     | 	.long 0			# holds num of elements
+  0x1c6: f4010000     | 	.long 500		# MAX ARRAY SIZE
+                      | 
+  0x1ca:              | array:
+  0x1ca: 00000000     | 	.long 0			# holds numbers from user
+                      | 

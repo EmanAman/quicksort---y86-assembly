@@ -1,0 +1,38 @@
+  0x000: 308400100000 | main:	irmovl $0x1000, %esp	# set stack pointer
+  0x006: 308700000000 | 	irmovl $0, %edi		# di = 0 (result)
+  0x00c: 308601000000 | 	irmovl $1, %esi		# si = 1 (const var)
+  0x012: 308102000000 | 	irmovl $2, %ecx		# cx = 2 (const var)
+  0x018: f208         | 	rdint %eax		# scanf("%d",&n);
+  0x01a: a008         | 	pushl %eax		# push n on stack
+  0x01c: 802c000000   | 	call fib		# call fib(n)
+  0x021: f378         | 	wrint %edi		# print result of fib(n)
+  0x023: 30800a000000 | 	irmovl $10, %eax	# $10 = '\n'
+  0x029: f108         | 	wrch %eax   		# print '\n'
+  0x02b: 10           | 	halt 			# Devtulya Kavathekar 111079285
+  0x02c:              | 	.align 4
+                      | 
+  0x02c: a058         | fib:	pushl %ebp		# ON ENTRY save old base/frame ptr
+  0x02e: 2045         | 	rrmovl %esp, %ebp	# ON ENTRY set new frame ptr
+                      | 	
+  0x030: 503508000000 | 	mrmovl 8(%ebp), %ebx	# bx = param
+  0x036: 6163         | 	subl %esi, %ebx		# bx--;
+  0x038: 7158000000   | 	jle bcase		# if 0 or -1, goto basecase
+                      | 	
+  0x03d: a038         | 	pushl %ebx		# bx > 0, push
+  0x03f: 802c000000   | 	call fib		# fib(n-1)
+                      | 
+  0x044: 503508000000 | 	mrmovl 8(%ebp), %ebx	# bx = param
+  0x04a: 6113         | 	subl %ecx, %ebx		# bx = bx - 2;
+  0x04c: a038         | 	pushl %ebx 		# push bx on stack
+  0x04e: 802c000000   | 	call fib		# fib(n-2)
+                      | 
+  0x053: 2054         | exit:	rrmovl %ebp, %esp	# ON EXIT reset stack ptr
+  0x055: b058         | 	popl %ebp    		# ON EXIT restore old base/frame ptr
+  0x057: 90           | 	ret
+                      | 
+  0x058: 6063         | bcase:	addl %esi, %ebx		# -1 + 1 = 0
+  0x05a: 7353000000   | 	je exit	   		# do nothing
+                      | 	
+  0x05f: 6067         | incr: 	addl %esi, %edi		# di++; 0 + 1 = 1
+  0x061: 7053000000   | 	jmp exit   		# escape func
+                      | 
